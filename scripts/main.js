@@ -1,11 +1,29 @@
-import { dataLoader } from '/modules/lookfar/scripts/dataLoader.js';
+// scripts/main.js
 import { QualitiesEditor } from './qualities-editor.js';
+import { MODULE_ID } from './constants.js';
 
-export const MODULE_ID = 'lookfar-extension';
-
-// Helper de Handlebars para los checkboxes
+// Helper de Handlebars para los checkboxes y el "not"
 Handlebars.registerHelper('not', v => !v);
 Handlebars.registerHelper('lfIncludes', (array, value) => Array.isArray(array) && array.includes(value));
+
+// Cache del dataLoader (se carga bajo demanda)
+let dataLoaderCache = null;
+
+/**
+ * Importa el dataLoader de Lookfar de forma perezosa y segura.
+ * Si el import falla, devuelve null y no rompe el resto del módulo.
+ */
+async function getDataLoader() {
+    if (dataLoaderCache) return dataLoaderCache;
+    try {
+        const mod = await import('/modules/lookfar/scripts/dataLoader.js');
+        dataLoaderCache = mod.dataLoader;
+        return dataLoaderCache;
+    } catch (err) {
+        console.error(`${MODULE_ID}: No se pudo importar dataLoader de Lookfar.`, err);
+        return null;
+    }
+}
 
 Hooks.once('init', () => {
     // Almacén persistente de cualidades personalizadas (por mundo)
@@ -39,7 +57,7 @@ Hooks.once('ready', () => {
     }
     // dataLoader.loadData() se completa en el hook init de Lookfar.
     // En ready ya está listo, pero por seguridad esperamos un tick.
-    setTimeout(injectQualities, 500);
+    setTimeout(() => injectQualities(), 500);
 });
 
 const TYPE_MAP = {
@@ -49,7 +67,13 @@ const TYPE_MAP = {
     accessory: { containerKey: 'accessoriesData', arrayKey: 'accessoryQualities', capitalized: 'Accessory' }
 };
 
-export function injectQualities() {
+export async function injectQualities() {
+    const dataLoader = await getDataLoader();
+    if (!dataLoader) {
+        console.warn(`${MODULE_ID}: dataLoader no disponible, no se pueden inyectar cualidades.`);
+        return;
+    }
+
     const data = game.settings.get(MODULE_ID, 'customQualities');
     const qualities = data.qualities ?? [];
 

@@ -1,4 +1,5 @@
-import { MODULE_ID, injectQualities } from './main.js';
+import { MODULE_ID } from './constants.js';
+import { injectQualities } from './main.js';
 import { QualityDialog } from './quality-dialog.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
