@@ -1,0 +1,18 @@
+{
+  "qualities": {
+    "my-custom": [
+      { "id": "shadowfire", "cost": 800, "appliesTo": ["weapon"] },
+      { "id": "cauterized", "cost": 600, "appliesTo": ["armor"] }
+    ]
+  },
+  "translations": {
+    "shadowfire": {
+      "Weapon": "Shadowfire",
+      "Description": "El ataque ignora la resistencia al daño de fuego."
+    },
+    "cauterized": {
+      "Armor": "Cauterized",
+      "Description": "Al recibir daño de fuego, el portador se cura la mitad del daño recibido."
+    }
+  }
+}
