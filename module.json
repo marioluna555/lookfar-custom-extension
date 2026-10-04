@@ -19,5 +19,5 @@
   },
   "url": "https://github.com/marioluna555/lookfar-extension",
   "manifest": "https://github.com/marioluna555/lookfar-custom-extension/releases/latest/download/module.json",
-  "download": "https://github.com/marioluna555/lookfar-custom-extension/releases/1.0.0/download/module.zip"
+  "download": "https://github.com/marioluna555/lookfar-custom-extension/releases/v1.0.0/download/module.zip"
 }
