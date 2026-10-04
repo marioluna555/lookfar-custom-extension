@@ -1,0 +1,13 @@
+{
+    "LOOKFAR_EXT": {
+        "Editor": {
+            "Title": "Editor de Cualidades Personalizadas",
+            "MenuName": "Editor de Cualidades",
+            "MenuLabel": "Abrir Editor",
+            "MenuHint": "Añade, edita o elimina cualidades personalizadas para la Forja de Objetos."
+        },
+        "Dialog": {
+            "Title": "Cualidad Personalizada"
+        }
+    }
+}
