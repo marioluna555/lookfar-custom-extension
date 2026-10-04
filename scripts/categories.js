@@ -1,11 +1,9 @@
 import { MODULE_ID, DEFAULT_CATEGORIES } from './constants.js';
 
-/** Devuelve las categorías custom guardadas por el GM. */
 export function getCustomCategories() {
     return game.settings.get(MODULE_ID, 'customCategories') ?? [];
 }
 
-/** Devuelve las categorías nativas leídas desde Lookfar. */
 export async function getNativeCategories() {
     try {
         const mod = await import('/modules/lookfar/scripts/dataLoader.js');
@@ -45,9 +43,29 @@ export async function addCategory(name) {
 
 export async function removeCategory(name) {
     const current = getCustomCategories();
+    if (!current.includes(name)) return 0;
+
+    // Reasignar cualidades a 'custom' antes de eliminar
+    const qualitiesData = game.settings.get(MODULE_ID, 'customQualities');
+    const qualities = qualitiesData.qualities ?? [];
+    let reassigned = 0;
+
+    for (const q of qualities) {
+        if (q.category === name) {
+            q.category = 'custom';
+            reassigned++;
+        }
+    }
+
+    if (reassigned > 0) {
+        await game.settings.set(MODULE_ID, 'customQualities', { qualities });
+    }
+
     await game.settings.set(
         MODULE_ID,
         'customCategories',
         current.filter(c => c !== name)
     );
+
+    return reassigned;
 }

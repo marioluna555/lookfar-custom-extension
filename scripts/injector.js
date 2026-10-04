@@ -2,6 +2,7 @@ import { MODULE_ID, TYPE_MAP } from './constants.js';
 import { getQualities } from './qualities.js';
 
 let dataLoaderCache = null;
+let nativeCache = null;
 
 async function getDataLoader() {
     if (dataLoaderCache) return dataLoaderCache;
@@ -15,24 +16,58 @@ async function getDataLoader() {
     }
 }
 
+/**
+ * Guarda una copia profunda de los datos nativos de Lookfar.
+ * Se ejecuta una sola vez, antes de cualquier inyección.
+ */
+function cacheNativeData(dataLoader) {
+    if (nativeCache) return;
+    nativeCache = {};
+    for (const [typeKey, info] of Object.entries(TYPE_MAP)) {
+        const container = dataLoader?.[info.containerKey];
+        if (!container) continue;
+        const qualities = container[info.arrayKey];
+        if (qualities) {
+            nativeCache[typeKey] = JSON.parse(JSON.stringify(qualities));
+        }
+    }
+}
+
 export async function injectQualities() {
     const dataLoader = await getDataLoader();
     if (!dataLoader) return;
 
+    // 1) Guardar copia original de los datos nativos (solo la primera vez)
+    cacheNativeData(dataLoader);
+
+    // 2) Restaurar los datos nativos originales antes de cualquier modificación
+    for (const [typeKey, info] of Object.entries(TYPE_MAP)) {
+        const container = dataLoader?.[info.containerKey];
+        if (!container) continue;
+        const native = nativeCache[typeKey];
+        if (native) {
+            container[info.arrayKey] = JSON.parse(JSON.stringify(native));
+        }
+    }
+
+    const hideNative = game.settings.get(MODULE_ID, 'hideNativeQualities');
     const qualities = getQualities();
 
-    // 1) Limpiar inyecciones previas
-    for (const info of Object.values(TYPE_MAP)) {
-        const catObj = dataLoader?.[info.containerKey]?.[info.arrayKey];
-        if (!catObj || typeof catObj !== 'object') continue;
-        for (const cat of Object.keys(catObj)) {
-            if (Array.isArray(catObj[cat])) {
-                catObj[cat] = catObj[cat].filter(q => !q._lookfarExtension);
+    // 3) Si el checkbox está activo, eliminar todas las cualidades nativas
+    if (hideNative) {
+        for (const info of Object.values(TYPE_MAP)) {
+            const catObj = dataLoader?.[info.containerKey]?.[info.arrayKey];
+            if (!catObj || typeof catObj !== 'object') continue;
+            for (const cat of Object.keys(catObj)) {
+                if (Array.isArray(catObj[cat])) {
+                    // Conservar solo las que llevan nuestra marca
+                    catObj[cat] = catObj[cat].filter(q => q._lookfarExtension);
+                }
             }
         }
     }
 
-    // 2) Inyectar nuevas
+    // 4) Inyectar las cualidades personalizadas
     for (const q of qualities) {
         if (!q.id || !Array.isArray(q.appliesTo) || !q.appliesTo.length) continue;
         const category = q.category || 'custom';
@@ -55,7 +90,6 @@ export async function injectQualities() {
             if (!container) continue;
             container[info.arrayKey] ??= {};
             container[info.arrayKey][category] ??= [];
-
             const exists = container[info.arrayKey][category].some(e => e.id === q.id);
             if (!exists) {
                 container[info.arrayKey][category].push({
@@ -69,5 +103,5 @@ export async function injectQualities() {
         }
     }
 
-    console.log(`${MODULE_ID}: ${qualities.length} cualidades inyectadas.`);
+    console.log(`${MODULE_ID}: ${qualities.length} cualidades inyectadas. (hideNative: ${hideNative})`);
 }

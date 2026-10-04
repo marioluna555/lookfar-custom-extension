@@ -4,10 +4,27 @@
             "Title": "Editor de Cualidades Personalizadas",
             "MenuName": "Editor de Cualidades",
             "MenuLabel": "Abrir Editor",
-            "MenuHint": "Añade, edita o elimina cualidades personalizadas para la Forja de Objetos."
+            "MenuHint": "Añade, edita o elimina cualidades personalizadas para la Forja de Objetos.",
+            "ManageCategories": "Gestionar Categorías"
         },
         "Dialog": {
             "Title": "Cualidad Personalizada"
+        },
+        "CategoriesEditor": {
+            "Title": "Gestionar Categorías",
+            "NewPlaceholder": "Nueva categoría...",
+            "Add": "Añadir",
+            "NativeTitle": "Categorías nativas de Lookfar",
+            "NativeNote": "(solo lectura)",
+            "CustomTitle": "Categorías personalizadas",
+            "Delete": "Eliminar categoría",
+            "Empty": "No hay categorías personalizadas todavía. Añade una con el campo de arriba."
+        },
+        "Settings": {
+            "HideNative": {
+                "Name": "Ignorar cualidades nativas",
+                "Hint": "Si se activa, la Forja de Objetos solo mostrará las cualidades personalizadas. Las cualidades originales de Lookfar se ocultarán."
+            }
         }
     }
 }

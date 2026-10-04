@@ -1,8 +1,11 @@
 {{! templates/editor.hbs }}
 <div class="lookfar-extension-editor">
     <div class="editor-header">
+        <button type="button" data-action="manageCategories">
+            <i class="fas fa-tags"></i> {{localize "LOOKFAR_EXT.Editor.ManageCategories"}}
+        </button>
         <button type="button" data-action="addQuality">
-            <i class="fas fa-plus"></i> Añadir Cualidad
+            <i class="fas fa-plus"></i> {{localize "LOOKFAR_EXT.Editor.AddQuality"}}
         </button>
     </div>
 

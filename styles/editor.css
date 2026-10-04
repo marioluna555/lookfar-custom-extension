@@ -38,3 +38,82 @@
 .lookfar-extension-dialog .checkbox { display: flex; align-items: center; gap: 4px; font-weight: normal; }
 .lookfar-extension-dialog .hint { font-size: 11px; opacity: 0.7; margin: 2px 0 0 0; }
 .lookfar-extension-dialog .form-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+/* Editor de categorías */
+.lookfar-extension-categories-editor { padding: 8px; }
+
+.lookfar-extension-categories-editor .add-category-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.lookfar-extension-categories-editor .add-category-row input {
+    flex: 1;
+    padding: 4px 6px;
+}
+.lookfar-extension-categories-editor .add-category-row button {
+    width: auto;
+    padding: 4px 10px;
+}
+
+.lookfar-extension-categories-editor h3 {
+    margin: 12px 0 6px;
+    border-bottom: 1px solid var(--color-border-light-tertiary, #444);
+    padding-bottom: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.lookfar-extension-categories-editor .category-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.lookfar-extension-categories-editor .category-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.lookfar-extension-categories-editor .category-list li:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+.lookfar-extension-categories-editor .cat-name {
+    font-weight: bold;
+    flex: 1;
+}
+.lookfar-extension-categories-editor .cat-count {
+    display: inline-block;
+    background: rgba(70, 130, 180, 0.35);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 11px;
+    min-width: 20px;
+    text-align: center;
+}
+.lookfar-extension-categories-editor .cat-note {
+    font-size: 11px;
+    opacity: 0.6;
+    font-style: italic;
+}
+.lookfar-extension-categories-editor .category-list.custom button {
+    width: auto;
+    padding: 2px 8px;
+}
+.lookfar-extension-categories-editor .empty {
+    text-align: center;
+    padding: 16px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Cabecera del editor principal */
+.lookfar-extension-editor .editor-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.lookfar-extension-editor .editor-header button { width: auto; }

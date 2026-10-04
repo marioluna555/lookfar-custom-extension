@@ -7,6 +7,7 @@ import {
     findQuality
 } from './qualities.js';
 import { QualityDialog } from './quality-dialog.js';
+import { CategoriesEditor } from './categories-editor.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -24,7 +25,8 @@ export class QualitiesEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         actions: {
             addQuality: QualitiesEditor.#onAddQuality,
             editQuality: QualitiesEditor.#onEditQuality,
-            deleteQuality: QualitiesEditor.#onDeleteQuality
+            deleteQuality: QualitiesEditor.#onDeleteQuality,
+            manageCategories: QualitiesEditor.#onManageCategories
         }
     };
 
@@ -91,5 +93,9 @@ export class QualitiesEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         } catch (err) {
             ui.notifications.error(err.message);
         }
+    }
+
+    static async #onManageCategories(event, target) {
+        new CategoriesEditor().render(true);
     }
 }

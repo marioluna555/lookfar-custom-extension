@@ -4,10 +4,27 @@
             "Title": "Custom Qualities Editor",
             "MenuName": "Qualities Editor",
             "MenuLabel": "Open Editor",
-            "MenuHint": "Add, edit, or remove custom qualities for the Item Forge."
+            "MenuHint": "Add, edit, or remove custom qualities for the Item Forge.",
+            "ManageCategories": "Manage Categories"
         },
         "Dialog": {
             "Title": "Custom Quality"
+        },
+        "CategoriesEditor": {
+            "Title": "Manage Categories",
+            "NewPlaceholder": "New category...",
+            "Add": "Add",
+            "NativeTitle": "Lookfar native categories",
+            "NativeNote": "(read only)",
+            "CustomTitle": "Custom categories",
+            "Delete": "Delete category",
+            "Empty": "No custom categories yet. Add one using the field above."
+        },
+        "Settings": {
+            "HideNative": {
+                "Name": "Hide native qualities",
+                "Hint": "If enabled, the Item Forge will only show custom qualities. Lookfar's native qualities will be hidden."
+            }
         }
     }
 }

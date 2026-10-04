@@ -1,0 +1,37 @@
+<div class="lookfar-extension-categories-editor">
+    <div class="add-category-row">
+        <input type="text" name="name"
+               placeholder="{{localize 'LOOKFAR_EXT.CategoriesEditor.NewPlaceholder'}}" />
+        <button type="submit">
+            <i class="fas fa-plus"></i> {{localize "LOOKFAR_EXT.CategoriesEditor.Add"}}
+        </button>
+    </div>
+
+    <h3>{{localize "LOOKFAR_EXT.CategoriesEditor.NativeTitle"}}</h3>
+    <ul class="category-list native">
+        {{#each native}}
+        <li>
+            <span class="cat-name">{{this.name}}</span>
+            <span class="cat-count">{{this.count}}</span>
+            <span class="cat-note">{{localize "LOOKFAR_EXT.CategoriesEditor.NativeNote"}}</span>
+        </li>
+        {{/each}}
+    </ul>
+
+    <h3>{{localize "LOOKFAR_EXT.CategoriesEditor.CustomTitle"}}</h3>
+    {{#if hasCustom}}
+    <ul class="category-list custom">
+        {{#each custom}}
+        <li>
+            <span class="cat-name">{{this.name}}</span>
+            <span class="cat-count">{{this.count}}</span>
+            <button type="button" data-action="deleteCategory" data-name="{{this.name}}" title="{{localize 'LOOKFAR_EXT.CategoriesEditor.Delete'}}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p class="empty">{{localize "LOOKFAR_EXT.CategoriesEditor.Empty"}}</p>
+    {{/if}}
+</div>
