@@ -5,7 +5,8 @@
             "MenuName": "Editor de Cualidades",
             "MenuLabel": "Abrir Editor",
             "MenuHint": "Añade, edita o elimina cualidades personalizadas para la Forja de Objetos.",
-            "ManageCategories": "Gestionar Categorías"
+            "ManageCategories": "Gestionar Categorías",
+            "AddQuality": "Agregar Cualidad"
         },
         "Dialog": {
             "Title": "Cualidad Personalizada"

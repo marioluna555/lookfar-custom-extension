@@ -5,7 +5,8 @@
             "MenuName": "Qualities Editor",
             "MenuLabel": "Open Editor",
             "MenuHint": "Add, edit, or remove custom qualities for the Item Forge.",
-            "ManageCategories": "Manage Categories"
+            "ManageCategories": "Manage Categories",
+            "AddQuality": "Add Quality"
         },
         "Dialog": {
             "Title": "Custom Quality"
