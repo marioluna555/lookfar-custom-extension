@@ -2,6 +2,8 @@ import { MODULE_ID } from './constants.js';
 import { registerSettings } from './settings.js';
 import { injectQualities } from './injector.js';
 import { QualitiesEditor } from './qualities-editor.js';
+import { registerForgeHook } from './forge-hook.js';
+import { invalidateCategoriesCache } from './forge-hook.js';
 
 Handlebars.registerHelper('not', v => !v);
 Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -9,7 +11,8 @@ Handlebars.registerHelper('lfIncludes', (arr, v) => Array.isArray(arr) && arr.in
 
 Hooks.once('init', () => {
     registerSettings();
-
+    registerForgeHook();
+    
     game.settings.registerMenu(MODULE_ID, 'qualitiesEditor', {
         name: 'LOOKFAR_EXT.Editor.MenuName',
         label: 'LOOKFAR_EXT.Editor.MenuLabel',

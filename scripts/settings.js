@@ -1,5 +1,6 @@
 import { MODULE_ID } from "./constants.js";
 import { injectQualities } from "./injector.js";
+import { invalidateCategoriesCache } from './forge-hook.js';
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, "customQualities", {
@@ -19,6 +20,7 @@ export function registerSettings() {
     type: Array,
     default: [],
     onChange: () => {
+      invalidateCategoriesCache();
       injectQualities();
       ui.notifications.info("Lookfar Extension: categorías actualizadas.");
     },
