@@ -1,0 +1,13 @@
+{
+    "LOOKFAR_EXT": {
+        "Editor": {
+            "Title": "Custom Qualities Editor",
+            "MenuName": "Qualities Editor",
+            "MenuLabel": "Open Editor",
+            "MenuHint": "Add, edit, or remove custom qualities for the Item Forge."
+        },
+        "Dialog": {
+            "Title": "Custom Quality"
+        }
+    }
+}

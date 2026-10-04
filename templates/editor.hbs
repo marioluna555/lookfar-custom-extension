@@ -1,0 +1,43 @@
+<div class="editor-header">
+    <button type="button" data-action="addQuality">
+        <i class="fas fa-plus"></i> Añadir Cualidad
+    </button>
+</div>
+
+{{#if hasQualities}}
+<table class="qualities-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Coste</th>
+            <th>Aplica a</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each qualities}}
+        <tr>
+            <td><code>{{this.id}}</code></td>
+            <td>{{this.name}}</td>
+            <td>{{this.cost}} z</td>
+            <td>
+                {{#each this.appliesTo}}
+                <span class="tag">{{this}}</span>
+                {{/each}}
+            </td>
+            <td class="actions">
+                <button type="button" data-action="editQuality" data-id="{{this.id}}" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" data-action="deleteQuality" data-id="{{this.id}}" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+{{else}}
+<p class="empty">No hay cualidades personalizadas todavía. Pulsa "Añadir Cualidad" para crear la primera.</p>
+{{/if}}

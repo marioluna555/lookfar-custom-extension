@@ -1,0 +1,40 @@
+.lookfar-extension-editor { padding: 8px; }
+.lookfar-extension-editor .editor-header { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+
+.lookfar-extension-editor .qualities-table { width: 100%; border-collapse: collapse; }
+.lookfar-extension-editor .qualities-table th,
+.lookfar-extension-editor .qualities-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--color-border-light-tertiary, #444);
+    text-align: left;
+    vertical-align: middle;
+}
+.lookfar-extension-editor .qualities-table th {
+    background: rgba(0,0,0,0.15);
+    font-weight: bold;
+}
+.lookfar-extension-editor .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    margin-right: 4px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
+    font-size: 11px;
+}
+.lookfar-extension-editor .actions { white-space: nowrap; }
+.lookfar-extension-editor .actions button { width: auto; padding: 2px 8px; margin: 0 2px; }
+.lookfar-extension-editor .empty { text-align: center; padding: 24px; opacity: 0.7; font-style: italic; }
+
+.lookfar-extension-dialog .form-group { margin-bottom: 10px; }
+.lookfar-extension-dialog label { display: block; font-weight: bold; margin-bottom: 4px; }
+.lookfar-extension-dialog input[type="text"],
+.lookfar-extension-dialog input[type="number"],
+.lookfar-extension-dialog textarea {
+    width: 100%;
+    padding: 4px 6px;
+    box-sizing: border-box;
+}
+.lookfar-extension-dialog .checkbox-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.lookfar-extension-dialog .checkbox { display: flex; align-items: center; gap: 4px; font-weight: normal; }
+.lookfar-extension-dialog .hint { font-size: 11px; opacity: 0.7; margin: 2px 0 0 0; }
+.lookfar-extension-dialog .form-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
