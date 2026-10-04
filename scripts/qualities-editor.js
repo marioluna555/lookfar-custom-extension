@@ -1,5 +1,11 @@
 import { MODULE_ID } from './constants.js';
-import { injectQualities } from './main.js';
+import { injectQualities } from './injector.js';
+import {
+    getQualities,
+    saveQuality,
+    deleteQuality,
+    findQuality
+} from './qualities.js';
 import { QualityDialog } from './quality-dialog.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -14,7 +20,7 @@ export class QualitiesEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: 'fas fa-hammer',
             resizable: true
         },
-        position: { width: 760, height: 'auto' },
+        position: { width: 820, height: 'auto' },
         actions: {
             addQuality: QualitiesEditor.#onAddQuality,
             editQuality: QualitiesEditor.#onEditQuality,
@@ -27,58 +33,63 @@ export class QualitiesEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     async _prepareContext(options) {
-        const data = game.settings.get(MODULE_ID, 'customQualities');
+        const qualities = getQualities();
         return {
-            qualities: data.qualities ?? [],
-            hasQualities: (data.qualities ?? []).length > 0
+            qualities,
+            hasQualities: qualities.length > 0
         };
     }
 
     static async #onAddQuality(event, target) {
         const quality = await QualityDialog.open({});
-        if (quality) await this._saveQuality(quality);
+        if (!quality) return;
+
+        try {
+            await saveQuality(quality);
+            await injectQualities();
+            ui.notifications.info(`Cualidad "${quality.name}" añadida.`);
+            this.render();
+        } catch (err) {
+            ui.notifications.error(err.message);
+        }
     }
 
     static async #onEditQuality(event, target) {
         const id = target.dataset.id;
-        const data = game.settings.get(MODULE_ID, 'customQualities');
-        const quality = data.qualities.find(q => q.id === id);
-        if (!quality) return;
-        const updated = await QualityDialog.open({ ...quality, _existing: true });
-        if (updated) await this._saveQuality(updated, id);
+        const existing = findQuality(id);
+        if (!existing) return;
+
+        const updated = await QualityDialog.open({ ...existing, _existing: true });
+        if (!updated) return;
+
+        try {
+            await saveQuality(updated, id);
+            await injectQualities();
+            ui.notifications.info(`Cualidad "${updated.name}" actualizada.`);
+            this.render();
+        } catch (err) {
+            ui.notifications.error(err.message);
+        }
     }
 
     static async #onDeleteQuality(event, target) {
         const id = target.dataset.id;
+        const existing = findQuality(id);
+        if (!existing) return;
+
         const confirmed = await foundry.applications.api.DialogV2.confirm({
             window: { title: 'Eliminar Cualidad' },
-            content: `<p>¿Eliminar la cualidad <strong>${id}</strong>?</p>`
+            content: `<p>¿Eliminar la cualidad <strong>${existing.name}</strong> (<code>${id}</code>)?</p>`
         });
         if (!confirmed) return;
-        const data = game.settings.get(MODULE_ID, 'customQualities');
-        data.qualities = (data.qualities ?? []).filter(q => q.id !== id);
-        await game.settings.set(MODULE_ID, 'customQualities', data);
-        injectQualities();
-        this.render();
-    }
 
-    async _saveQuality(quality, originalId = null) {
-        const data = game.settings.get(MODULE_ID, 'customQualities');
-        const list = data.qualities ?? [];
-        if (originalId) {
-            const idx = list.findIndex(q => q.id === originalId);
-            if (idx >= 0) list[idx] = quality;
-            else list.push(quality);
-        } else {
-            if (list.some(q => q.id === quality.id)) {
-                ui.notifications.error(`Ya existe una cualidad con el id "${quality.id}".`);
-                return;
-            }
-            list.push(quality);
+        try {
+            await deleteQuality(id);
+            await injectQualities();
+            ui.notifications.info(`Cualidad "${existing.name}" eliminada.`);
+            this.render();
+        } catch (err) {
+            ui.notifications.error(err.message);
         }
-        data.qualities = list;
-        await game.settings.set(MODULE_ID, 'customQualities', data);
-        injectQualities();
-        this.render();
     }
 }

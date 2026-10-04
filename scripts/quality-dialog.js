@@ -1,4 +1,5 @@
-import { MODULE_ID } from './constants.js';
+import { MODULE_ID, ALL_TYPES } from './constants.js';
+import { getAllCategories } from './categories.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -10,6 +11,7 @@ export class QualityDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             name: '',
             description: '',
             cost: 0,
+            category: 'custom',
             appliesTo: ['weapon'],
             ...quality
         };
@@ -44,15 +46,14 @@ export class QualityDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     async _prepareContext(options) {
+        // Categorías: nativas (de Lookfar) + custom (del GM) + fallback 'custom'
+        const categories = await getAllCategories();
+
         return {
             quality: this.quality,
             isNew: !this.quality._existing,
-            types: [
-                { key: 'weapon',    label: 'Arma' },
-                { key: 'armor',     label: 'Armadura' },
-                { key: 'shield',    label: 'Escudo' },
-                { key: 'accessory', label: 'Accesorio' }
-            ]
+            categories,
+            types: ALL_TYPES
         };
     }
 
@@ -67,28 +68,33 @@ export class QualityDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     static async #onSubmit(event, form, formData) {
         const data = formData.object;
         const rawName = (data.name ?? '').trim();
+
         const id = (data.id ?? '').trim() || rawName
             .toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
 
-        if (!id)          { ui.notifications.error('El ID es obligatorio.'); return; }
-        if (!rawName)     { ui.notifications.error('El nombre es obligatorio.'); return; }
+        if (!id)      { ui.notifications.error('El ID es obligatorio.'); return; }
+        if (!rawName) { ui.notifications.error('El nombre es obligatorio.'); return; }
 
-        const appliesTo = ['weapon', 'armor', 'shield', 'accessory']
-            .filter(t => data[`appliesTo.${t}`]);
+        const appliesTo = ALL_TYPES
+            .map(t => t.key)
+            .filter(key => data[`appliesTo.${key}`]);
 
         if (appliesTo.length === 0) {
             ui.notifications.error('Selecciona al menos un tipo de objeto.');
             return;
         }
 
+        const category = (data.category ?? 'custom').trim() || 'custom';
+
         const quality = {
             id,
             name: rawName,
             description: (data.description ?? '').trim(),
             cost: Number(data.cost) || 0,
+            category,
             appliesTo
         };
 
