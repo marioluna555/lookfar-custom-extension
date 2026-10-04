@@ -1,114 +1,118 @@
 import { dataLoader } from '/modules/lookfar/scripts/dataLoader.js';
 
 const MODULE_ID = 'lookfar-extension';
+const JSON_PATH = `modules/${MODULE_ID}/data/custom-qualities.json`;
 
 /**
- * Lee una RollTable y devuelve un array de cualidades con el formato que usa Lookfar.
- * Cada resultado de la tabla debe tener:
- *   - name:        Nombre de la cualidad
- *   - description: Descripción del efecto
- *   - flags.lookfar-extension.cost:      Coste (número)
- *   - flags.lookfar-extension.appliesTo: Array de tipos (ej. ["weapon"])
+ * Carga el archivo JSON de cualidades personalizadas.
  */
-function getQualitiesFromTable(tableId, defaultKind) {
-    if (!tableId) return [];
-
-    const table = game.tables.get(tableId);
-    if (!table) {
-        console.warn(`${MODULE_ID}: No se encontró la RollTable con ID ${tableId}`);
-        return [];
+async function loadCustomQualities() {
+    try {
+        const response = await fetch(JSON_PATH);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+    } catch (err) {
+        console.error(`${MODULE_ID}: Error al cargar ${JSON_PATH}`, err);
+        return null;
     }
-
-    return table.results
-        .filter(r => r.type === CONST.TABLE_RESULT_TYPES.TEXT)
-        .map(result => {
-            const flags = result.flags?.[MODULE_ID] ?? {};
-            return {
-                name: result.name,
-                description: result.description || result.text || '',
-                cost: Number(flags.cost) || 0,
-                appliesTo: Array.isArray(flags.appliesTo)
-                    ? flags.appliesTo
-                    : [defaultKind]
-            };
-        });
 }
 
 /**
- * Inyecta las cualidades de las tablas en el dataLoader de Lookfar.
+ * Fusiona las cualidades personalizadas con las de Lookfar.
  */
-function injectQualities() {
-    const weaponTableId = game.settings.get(MODULE_ID, 'weaponTableId');
-    const armorTableId = game.settings.get(MODULE_ID, 'armorTableId');
-    const shieldTableId = game.settings.get(MODULE_ID, 'shieldTableId');
-    const accessoryTableId = game.settings.get(MODULE_ID, 'accessoryTableId');
+function mergeQualities(customData) {
+    if (!customData) return;
 
-    const injections = [
-        { kind: 'weapon', tableId: weaponTableId, path: 'weaponsData.weaponQualities' },
-        { kind: 'armor', tableId: armorTableId, path: 'armorData.armorQualities' },
-        { kind: 'shield', tableId: shieldTableId, path: 'shieldsData.shieldQualities' },
-        { kind: 'accessory', tableId: accessoryTableId, path: 'accessoriesData.accessoryQualities' }
+    const { qualities, translations } = customData;
+
+    // 1. Fusionar las definiciones de cualidades
+    // Lookfar espera un objeto con categorías: { basic: [...], aerial: [...] }
+    // Buscamos dónde guarda Lookfar sus datos. Según itemForge.js, lee de dataLoader.
+    // Los arrays de cualidades por tipo de objeto están en:
+    // dataLoader.weaponsData.weaponQualities, armorData.armorQualities, etc.
+    // Pero esas listas ya están procesadas. Para inyectar cualidades nuevas,
+    // necesitamos añadir directamente a esos arrays.
+
+    // Primero, veamos si dataLoader expone las listas por tipo de objeto:
+    const targets = [
+        { key: 'weaponQualities', path: ['weaponsData', 'weaponQualities'] },
+        { key: 'armorQualities', path: ['armorData', 'armorQualities'] },
+        { key: 'shieldQualities', path: ['shieldsData', 'shieldQualities'] },
+        { key: 'accessoryQualities', path: ['accessoriesData', 'accessoryQualities'] }
     ];
 
-    for (const { kind, tableId, path } of injections) {
-        if (!tableId) continue;
+    // Recorremos las categorías personalizadas y sus cualidades
+    for (const [category, entries] of Object.entries(qualities)) {
+        for (const entry of entries) {
+            // Determinamos a qué listas por tipo de objeto pertenece según appliesTo
+            for (const { key, path } of targets) {
+                // Navegamos hasta el contenedor (ej. dataLoader.weaponsData)
+                const container = path.slice(0, -1).reduce((obj, k) => obj?.[k], dataLoader);
+                const arrayKey = path[path.length - 1];
 
-        const custom = getQualitiesFromTable(tableId, kind);
-        if (!custom.length) continue;
+                if (!container || !Array.isArray(container[arrayKey])) {
+                    console.warn(`${MODULE_ID}: No se encontró ${path.join('.')}`);
+                    continue;
+                }
 
-        // Navegamos por la ruta (ej. "weaponsData.weaponQualities")
-        const parts = path.split('.');
-        const container = parts.slice(0, -1).reduce((obj, key) => obj?.[key], dataLoader);
-        const arrayKey = parts[parts.length - 1];
+                // Si la cualidad aplica a este tipo de objeto, la añadimos
+                // (asumiendo que appliesTo contiene strings como "weapon", "armor", etc.)
+                const appliesToThis = entry.appliesTo.some(t => {
+                    // Mapeo simple: "weapon" -> weaponQualities, "armor" -> armorQualities, etc.
+                    const typeMap = { weapon: 'weaponQualities', armor: 'armorQualities', shield: 'shieldQualities', accessory: 'accessoryQualities' };
+                    return typeMap[t] === key;
+                });
 
-        if (!container) {
-            console.warn(`${MODULE_ID}: No se encontró la ruta ${path} en dataLoader.`);
-            continue;
+                if (!appliesToThis) continue;
+
+                // Evitar duplicados: si ya existe un id igual, lo reemplazamos
+                const existingIndex = container[arrayKey].findIndex(q => q.id === entry.id);
+                if (existingIndex >= 0) {
+                    container[arrayKey][existingIndex] = { ...entry };
+                } else {
+                    container[arrayKey].push({ ...entry });
+                }
+            }
         }
-
-        const existing = container[arrayKey] ?? [];
-        container[arrayKey] = [...existing, ...custom];
-
-        console.log(`${MODULE_ID}: ${custom.length} cualidades de tipo "${kind}" inyectadas.`);
     }
+
+    // 2. Fusionar las traducciones
+    // Las traducciones se usan a través de game.i18n. Podemos fusionarlas allí.
+    if (translations) {
+        const currentTranslations = game.i18n.translations;
+        for (const [id, trans] of Object.entries(translations)) {
+            // Lookfar busca las traducciones bajo la clave "qualities" en el bundle de i18n.
+            // Añadimos/sobrescribimos en el objeto de traducciones global.
+            if (!currentTranslations.qualities) currentTranslations.qualities = {};
+            // Buscamos la categoría a la que pertenece esta cualidad (según qualities)
+            // para colocarla en el lugar correcto. Como no sabemos la categoría exacta,
+            // podemos ponerla en una categoría genérica "custom" o buscar en todas.
+            // Simplificación: la añadimos directamente en el nivel superior de "qualities".
+            // Pero Lookfar espera que esté bajo una categoría. 
+            // Para simplificar, la añadimos bajo la primera categoría que encontremos o creamos una "custom".
+            if (!currentTranslations.qualities.custom) currentTranslations.qualities.custom = {};
+            currentTranslations.qualities.custom[id] = trans;
+        }
+        console.log(`${MODULE_ID}: Traducciones personalizadas añadidas.`);
+    }
+
+    console.log(`${MODULE_ID}: Cualidades personalizadas fusionadas correctamente.`);
 }
 
-Hooks.once('init', () => {
-    // Registrar los ajustes para que el GM configure las tablas
-    const settingConfig = {
-        scope: 'world',
-        config: true,
-        type: String,
-        default: ''
-    };
+Hooks.once('ready', async () => {
+    const lookfar = game.modules.get('lookfar');
+    if (!lookfar?.active) {
+        console.warn(`${MODULE_ID}: Lookfar no está activo.`);
+        return;
+    }
 
-    game.settings.register(MODULE_ID, 'weaponTableId', {
-        ...settingConfig,
-        name: 'Tabla de Cualidades (Armas)',
-        hint: 'ID de la RollTable con cualidades para armas.'
-    });
+    // Esperamos a que dataLoader tenga datos
+    if (!dataLoader?.weaponsData) {
+        await new Promise(r => setTimeout(r, 1000));
+    }
 
-    game.settings.register(MODULE_ID, 'armorTableId', {
-        ...settingConfig,
-        name: 'Tabla de Cualidades (Armaduras)',
-        hint: 'ID de la RollTable con cualidades para armaduras.'
-    });
+    const custom = await loadCustomQualities();
+    mergeQualities(custom);
 
-    game.settings.register(MODULE_ID, 'shieldTableId', {
-        ...settingConfig,
-        name: 'Tabla de Cualidades (Escudos)',
-        hint: 'ID de la RollTable con cualidades para escudos.'
-    });
-
-    game.settings.register(MODULE_ID, 'accessoryTableId', {
-        ...settingConfig,
-        name: 'Tabla de Cualidades (Accesorios)',
-        hint: 'ID de la RollTable con cualidades para accesorios.'
-    });
-});
-
-Hooks.once('ready', () => {
-    // En este punto, Lookfar ya ha ejecutado dataLoader.loadData() en su propio hook 'init'
-    // (porque await dataLoader.loadData() se completa antes de que se dispare 'ready')
-    injectQualities();
+    ui.notifications.info('Lookfar Extension: cualidades personalizadas cargadas.');
 });
