@@ -117,3 +117,47 @@
     margin-bottom: 8px;
 }
 .lookfar-extension-editor .editor-header button { width: auto; }
+
+/* Contenedor con scroll */
+.lookfar-extension-editor .qualities-scroll {
+    max-height: 65vh;       /* Ajusta según prefieras */
+    overflow-y: auto;
+    padding-right: 4px;     /* Para que la barra de scroll no pegue con el borde */
+}
+
+/* Scrollbar estilizada (opcional, para que se vea bien en Foundry) */
+.lookfar-extension-editor .qualities-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.lookfar-extension-editor .qualities-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+.lookfar-extension-editor .qualities-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+.lookfar-extension-editor .qualities-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Estilos de los grupos de categoría */
+.lookfar-extension-editor .category-group {
+    margin-bottom: 16px;
+}
+.lookfar-extension-editor .category-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 6px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-border-light-tertiary, #444);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.lookfar-extension-editor .category-count {
+    font-size: 11px;
+    font-weight: normal;
+    opacity: 0.7;
+}

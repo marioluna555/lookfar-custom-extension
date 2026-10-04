@@ -35,12 +35,24 @@ export class QualitiesEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     async _prepareContext(options) {
-        const qualities = getQualities();
-        return {
-            qualities,
-            hasQualities: qualities.length > 0
-        };
+    const qualities = getQualities();
+
+    const grouped = {};
+    for (const q of qualities) {
+        const cat = q.category || 'custom';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(q);
     }
+    
+    const categories = Object.entries(grouped)
+        .map(([name, qualities]) => ({ name, qualities }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+        categories,
+        hasQualities: qualities.length > 0
+    };
+}
 
     static async #onAddQuality(event, target) {
         const quality = await QualityDialog.open({});

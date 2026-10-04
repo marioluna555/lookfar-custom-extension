@@ -9,43 +9,51 @@
         </button>
     </div>
 
-    {{#if hasQualities}}
-    <table class="qualities-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Coste</th>
-                <th>Aplica a</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each qualities}}
-            <tr>
-                <td><code>{{this.id}}</code></td>
-                <td>{{this.name}}</td>
-                <td><span class="tag cat">{{this.category}}</span></td>
-                <td>{{this.cost}} z</td>
-                <td>
-                    {{#each this.appliesTo}}
-                    <span class="tag">{{this}}</span>
-                    {{/each}}
-                </td>
-                <td class="actions">
-                    <button type="button" data-action="editQuality" data-id="{{this.id}}" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" data-action="deleteQuality" data-id="{{this.id}}" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
+    <div class="qualities-scroll">
+        {{#if hasQualities}}
+            {{#each categories}}
+            <div class="category-group">
+                <h3 class="category-title">
+                    <i class="fas fa-folder"></i> {{this.name}}
+                    <span class="category-count">({{this.qualities.length}})</span>
+                </h3>
+                <table class="qualities-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Coste</th>
+                            <th>Aplica a</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each this.qualities}}
+                        <tr>
+                            <td><code>{{this.id}}</code></td>
+                            <td>{{this.name}}</td>
+                            <td>{{this.cost}} z</td>
+                            <td>
+                                {{#each this.appliesTo}}
+                                <span class="tag">{{this}}</span>
+                                {{/each}}
+                            </td>
+                            <td class="actions">
+                                <button type="button" data-action="editQuality" data-id="{{this.id}}" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" data-action="deleteQuality" data-id="{{this.id}}" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
             {{/each}}
-        </tbody>
-    </table>
-    {{else}}
-    <p class="empty">No hay cualidades personalizadas todavía. Pulsa "Añadir Cualidad" para crear la primera.</p>
-    {{/if}}
+        {{else}}
+        <p class="empty">No hay cualidades personalizadas todavía. Pulsa "Añadir Cualidad" para crear la primera.</p>
+        {{/if}}
+    </div>
 </div>
